@@ -59,7 +59,7 @@ zx1_16_geo = read_nmea(zx1_16_path)
 zx2_15_geo = read_nmea(zx2_15_path)
 zx2_16_geo = read_nmea(zx2_16_path)
 
-
+# 11:59
 
 def calc_deg(deg_min):
     min = (deg_min % 100) / 60
