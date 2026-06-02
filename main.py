@@ -40,7 +40,12 @@ phi_mean_zx1_16, lam_mean_zx1_16 = f.calc_mean_philam(df_zx1_16)
 phi_mean_zx2_15, lam_mean_zx2_15 = f.calc_mean_philam(df_zx2_15)
 phi_mean_zx2_16, lam_mean_zx2_16 = f.calc_mean_philam(df_zx2_16)
 
-zx1_15_R = f.create_rotation_matrix(phi_mean_zx1_15, lam_mean_zx1_15)
+xyz_mean_zx1_15 = f.calc_mean_xyz(df_zx1_15)
+xyz_mean_zx1_16 = f.calc_mean_xyz(df_zx1_16)
+xyz_mean_zx2_15 = f.calc_mean_xyz(df_zx2_15)
+xyz_mean_zx2_16 = f.calc_mean_xyz(df_zx2_16)
+
+'''zx1_15_R = f.create_rotation_matrix(phi_mean_zx1_15, lam_mean_zx1_15)
 zx1_16_R = f.create_rotation_matrix(phi_mean_zx1_16, lam_mean_zx1_16)
 zx2_15_R = f.create_rotation_matrix(phi_mean_zx2_15, lam_mean_zx2_15)
 zx2_16_R = f.create_rotation_matrix(phi_mean_zx2_16, lam_mean_zx2_16)
@@ -48,7 +53,10 @@ zx2_16_R = f.create_rotation_matrix(phi_mean_zx2_16, lam_mean_zx2_16)
 zx1_15_ll = zx1_15_R @  zx1_15_xyz
 zx_16_ll =  zx1_16_R @ zx1_16_xyz
 zx2_15_ll = zx2_15_R @ zx2_15_xyz
-zx2_16_ll = zx2_16_R @ zx2_16_xyz
+zx2_16_ll = zx2_16_R @ zx2_16_xyz'''
+
+zx1_15_ll = f.dX_local_level(zx1_15_xyz, phi_mean_zx1_15, lam_mean_zx1_15, xyz_mean_zx1_15)
+
 
 print(zx1_15_ll)
 
