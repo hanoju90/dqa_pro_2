@@ -124,13 +124,11 @@ def create_rotation_matrix(lam, phi):
                         [np.cos(phi), 0, -np.sin(phi)]])
   return R_NED
 
-def dX_local_level(df):
-  x_mean = xyz_r.reshape(3, 1)
-  lam_r, phi_r, _ = xyz_to_lamphih(xyz_r)
-  Rll = create_rotation_matrix(lam_r, phi_r)
-  Xll_r = Rll @ xyz_r
-  Xll_s = Rll @ xyz_s
-  dXll = Xll_s - Xll_r
+def dX_local_level(xyz_array, phi_mean, lam_mean, xyz_mean):
+  Rll = create_rotation_matrix(lam_mean, phi_mean)
+  Xll_mean = Rll @ xyz_mean
+  Xll_arr = Rll @ xyz_array
+  dXll = Xll_arr.T - Xll_mean
   norm = np.linalg.norm(dXll, axis=0)
   ell_rs = dXll / norm
   return ell_rs
@@ -143,3 +141,10 @@ def calc_mean_philam(df):
     phi_mean = df['latitude'].mean()
     lam_mean = df['longitude'].mean()
     return phi_mean, lam_mean
+
+def calc_mean_xyz(df):
+    x_mean = df['X'].mean()
+    y_mean = df['Y'].mean()
+    z_mean = df['Z'].mean()
+    xyz_mean = np.array([x_mean, y_mean, z_mean])
+    return xyz_mean
