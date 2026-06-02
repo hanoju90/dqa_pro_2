@@ -75,7 +75,7 @@ def geo_to_ecef(df):
     return df
 
 
-mean_lam = zx1_15_geo['latitude'].mean()
+zx1_15_geo['latitude'] = calc_deg(zx1_15_geo['latitude'])
 
 print(mean_lam)
 
