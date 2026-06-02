@@ -74,3 +74,24 @@ def geo_to_ecef(df):
 
     return df
 
+
+mean_lam = zx1_15_geo['latitude'].mean()
+
+print(mean_lam)
+
+def create_rotation_matrix(lam, phi):
+  '''
+  Create rotation matrix to go from ECEF to N-E-D at a specific position
+      Args:
+          pos_xyz: ECEF coordinates of the position for which the rotation matrix should be calculated
+
+      Returns: numpy array of the rotation matrix
+  '''
+  lam = np.squeeze(lam)
+  phi = np.squeeze(phi)
+  lam = np.radians(lam)
+  phi = np.radians(phi)
+  R_NED = np.array([[-np.sin(phi) * np.cos(lam), -np.sin(lam), np.cos(phi) * -np.cos(lam)],
+                        [-np.sin(phi) * np.sin(lam), np.cos(lam), np.cos(phi) * -np.sin(lam)],
+                        [np.cos(phi), 0, -np.sin(phi)]])
+  return R_NED.T
