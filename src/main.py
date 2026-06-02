@@ -88,4 +88,20 @@ def calc_deg(deg_min):
     deg_dec = min + deg
     return deg_dec
 
+def calc_mean_coord()
 
+def create_rotation_matrix_NEU(lam, phi):
+  '''
+  function for rotations to North-East-Up
+  :param lam: lambda reference position
+  :param phi: phi reference positon
+  :return: rotation matrix of reference position
+  '''
+  lam = np.squeeze(lam)
+  phi = np.squeeze(phi)
+  lam = np.radians(lam)
+  phi = np.radians(phi)
+  R_NEU = np.array([[-np.sin(phi) * np.cos(lam), -np.sin(lam), np.cos(phi) * np.cos(lam)],
+                    [-np.sin(phi) * np.sin(lam), np.cos(lam), np.cos(phi) * np.sin(lam)],
+                    [np.cos(phi), 0, np.sin(phi)]])
+  return R_NEU.T
