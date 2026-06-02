@@ -62,6 +62,18 @@ zx2_16_ll = f.dX_local_level(zx2_16_xyz, phi_mean_zx2_16, lam_mean_zx2_16, xyz_m
 
 print(zx1_15_ll.shape)
 
+import matplotlib.pyplot as plt
+
+def plot_xy(arr):
+    plt.figure(figsize=(6, 6))
+    plt.plot(arr[:, 0], arr[:, 1], ".-", markersize=2)
+    plt.xlabel("X")
+    plt.ylabel("Y")
+    plt.axis("equal")
+    plt.grid(True)
+    plt.show()
+
+plot_xy(zx1_15_ll)
 
 
 
