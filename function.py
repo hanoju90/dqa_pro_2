@@ -107,8 +107,6 @@ def df_add_xyz(df, xyz_array):
     df['Z'] = xyz_array[2, :]
     return df
 
-print(zx1_15_geo)
-
 def create_rotation_matrix(lam, phi):
   '''
   Create rotation matrix to go from ECEF to N-E-D at a specific position
@@ -124,8 +122,24 @@ def create_rotation_matrix(lam, phi):
   R_NED = np.array([[-np.sin(phi) * np.cos(lam), -np.sin(lam), np.cos(phi) * -np.cos(lam)],
                         [-np.sin(phi) * np.sin(lam), np.cos(lam), np.cos(phi) * -np.sin(lam)],
                         [np.cos(phi), 0, -np.sin(phi)]])
-  return R_NED.T
+  return R_NED
+
+def dX_local_level(df):
+  x_mean = xyz_r.reshape(3, 1)
+  lam_r, phi_r, _ = xyz_to_lamphih(xyz_r)
+  Rll = create_rotation_matrix(lam_r, phi_r)
+  Xll_r = Rll @ xyz_r
+  Xll_s = Rll @ xyz_s
+  dXll = Xll_s - Xll_r
+  norm = np.linalg.norm(dXll, axis=0)
+  ell_rs = dXll / norm
+  return ell_rs
 
 def calc_height(df):
     df['height'] = df['geoidheight'] + df['geoidundulation']
     return df
+
+def calc_mean_philam(df):
+    phi_mean = df['latitude'].mean()
+    lam_mean = df['longitude'].mean()
+    return phi_mean, lam_mean

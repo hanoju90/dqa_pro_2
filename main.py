@@ -34,7 +34,24 @@ df_zx1_16 = f.df_add_xyz(zx1_16_geo, zx1_16_xyz)
 df_zx2_15 = f.df_add_xyz(zx2_15_geo, zx2_15_xyz)
 df_zx2_16 = f.df_add_xyz(zx2_16_geo, zx2_16_xyz)
 
-print(df_zx1_15)
+#mean phi lam coords
+phi_mean_zx1_15, lam_mean_zx1_15 = f.calc_mean_philam(df_zx1_15)
+phi_mean_zx1_16, lam_mean_zx1_16 = f.calc_mean_philam(df_zx1_16)
+phi_mean_zx2_15, lam_mean_zx2_15 = f.calc_mean_philam(df_zx2_15)
+phi_mean_zx2_16, lam_mean_zx2_16 = f.calc_mean_philam(df_zx2_16)
+
+zx1_15_R = f.create_rotation_matrix(phi_mean_zx1_15, lam_mean_zx1_15)
+zx1_16_R = f.create_rotation_matrix(phi_mean_zx1_16, lam_mean_zx1_16)
+zx2_15_R = f.create_rotation_matrix(phi_mean_zx2_15, lam_mean_zx2_15)
+zx2_16_R = f.create_rotation_matrix(phi_mean_zx2_16, lam_mean_zx2_16)
+
+zx1_15_ll = zx1_15_R @  zx1_15_xyz
+zx_16_ll =  zx1_16_R @ zx1_16_xyz
+zx2_15_ll = zx2_15_R @ zx2_15_xyz
+zx2_16_ll = zx2_16_R @ zx2_16_xyz
+
+print(zx1_15_ll)
+
 
 
 
