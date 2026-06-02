@@ -56,7 +56,9 @@ zx2_15_ll = zx2_15_R @ zx2_15_xyz
 zx2_16_ll = zx2_16_R @ zx2_16_xyz'''
 
 zx1_15_ll = f.dX_local_level(zx1_15_xyz, phi_mean_zx1_15, lam_mean_zx1_15, xyz_mean_zx1_15)
-
+zx1_16_ll = f.dX_local_level(zx1_16_xyz, phi_mean_zx1_16, lam_mean_zx1_16, xyz_mean_zx1_16)
+zx_2_15_ll = f.dX_local_level(zx2_15_xyz, phi_mean_zx2_15, lam_mean_zx2_15, xyz_mean_zx2_15)
+zx2_16_ll = f.dX_local_level(zx2_16_xyz, phi_mean_zx2_16, lam_mean_zx2_16, xyz_mean_zx2_16)
 
 print(zx1_15_ll.shape)
 
