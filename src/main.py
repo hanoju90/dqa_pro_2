@@ -1,6 +1,5 @@
 import numpy as np
 import pandas as pd
-from pyproj import Transformer
 
 zx1_15_path = "data/ZX1_2005-11-15_1105-1135_GGA-only.TXT"
 zx1_16_path = "data/ZX1_2005-11-16_1100-1130_GGA-only.TXT"
@@ -46,12 +45,12 @@ def read_nmea(nmea_file):
 
     df["latitude"] = df["time"].astype(float)
     df["latitude"] = df["latitude"].astype(float)
-    df["latitude"] = df["longitude"].astype(float)
-    df["latitude"] = df["quality"].astype(float)
-    df["latitude"] = df["nsats"].astype(float)
-    df["latitude"] = df["hdop"].astype(float)
-    df["latitude"] = df["geoidheight"].astype(float)
-    df["latitude"] = df["geoidundulation"].astype(float)
+    df["longitude"] = df["longitude"].astype(float)
+    df["quality"] = df["quality"].astype(float)
+    df["nsats"] = df["nsats"].astype(float)
+    df["hdop"] = df["hdop"].astype(float)
+    df["geoidheight"] = df["geoidheight"].astype(float)
+    df["geoidundulation"] = df["geoidundulation"].astype(float)
 
     return df
 
@@ -60,50 +59,23 @@ zx1_16_geo = read_nmea(zx1_16_path)
 zx2_15_geo = read_nmea(zx2_15_path)
 zx2_16_geo = read_nmea(zx2_16_path)
 
-def geo_to_ecef(df):
-    transformer = Transformer.from_crs(
-        "EPSG:4979",
-        "EPSG:4978",
-        always_xy=True
-    )
-
-    h = df.geoidheight + df.geoidundulation
-
-    x, y, z = transformer.transform(
-        df.longitude.values,
-        df.latitude.values,
-        h.values
-    )
-
-    df = df.copy()
-    df["X"] = x
-    df["Y"] = y
-    df["Z"] = z
-
-    return df
-
 def calc_deg(deg_min):
     min = (deg_min % 100) / 60
     deg = (deg_min // 100)
     deg_dec = min + deg
     return deg_dec
 
-def calc_mean_coord()
+def geo_to_ecef(df):
+    h = df.geoidheight + df.geoidundulation
 
-def create_rotation_matrix_NEU(lam, phi):
-  '''
-  function for rotations to North-East-Up
-  :param lam: lambda reference position
-  :param phi: phi reference positon
-  :return: rotation matrix of reference position
-  '''
-  lam = np.squeeze(lam)
-  phi = np.squeeze(phi)
-  lam = np.radians(lam)
-  phi = np.radians(phi)
-  R_NEU = np.array([[-np.sin(phi) * np.cos(lam), -np.sin(lam), np.cos(phi) * np.cos(lam)],
-                    [-np.sin(phi) * np.sin(lam), np.cos(lam), np.cos(phi) * np.sin(lam)],
-                    [np.cos(phi), 0, np.sin(phi)]])
-  return R_NEU.T
+    df.latitude = calc_deg(df.latitude)
 
-#test
+    return df
+
+zx1_15_ecef = geo_to_ecef(zx1_15_geo)
+print(zx1_15_ecef)
+print(zx1_16_geo)
+
+
+
+
