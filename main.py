@@ -43,8 +43,8 @@ def read_nmea(nmea_file):
         "check"
     ])
 
-    df["latitude"] = df["time"].astype(float)
-    #df["latitude"] = df["latitude"].astype(float)
+    df["time"] = df["time"].astype(float)
+    df["latitude"] = df["latitude"].astype(float)
     df["longitude"] = df["longitude"].astype(float)
     df["quality"] = df["quality"].astype(float)
     df["nsats"] = df["nsats"].astype(float)
@@ -59,6 +59,8 @@ zx1_16_geo = read_nmea(zx1_16_path)
 zx2_15_geo = read_nmea(zx2_15_path)
 zx2_16_geo = read_nmea(zx2_16_path)
 
+print(zx1_15_geo.to_string())
+
 def calc_deg(deg_min):
     min = (deg_min % 100) / 60
     deg = (deg_min // 100)
@@ -71,28 +73,4 @@ def geo_to_ecef(df):
     df.latitude = calc_deg(df.latitude)
 
     return df
-
-zx1_15_ecef = geo_to_ecef(zx1_15_geo)
-print(zx1_15_ecef)
-print(zx1_16_geo)
-
-
-
-def create_rotation_matrix(lam, phi):
-  '''
-  Create rotation matrix to go from ECEF to N-E-D at a specific position
-      Args:
-          pos_xyz: ECEF coordinates of the position for which the rotation matrix should be calculated
-
-      Returns: numpy array of the rotation matrix
-  '''
-  lam = np.squeeze(lam)
-  phi = np.squeeze(phi)
-  lam = np.radians(lam)
-  phi = np.radians(phi)
-  R_NED = np.array([[-np.sin(phi) * np.cos(lam), -np.sin(lam), np.cos(phi) * -np.cos(lam)],
-                        [-np.sin(phi) * np.sin(lam), np.cos(lam), np.cos(phi) * -np.sin(lam)],
-                        [np.cos(phi), 0, -np.sin(phi)]])
-  return R_NED.T
-
 
