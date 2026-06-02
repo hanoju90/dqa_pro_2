@@ -44,7 +44,7 @@ def read_nmea(nmea_file):
     ])
 
     df["latitude"] = df["time"].astype(float)
-    df["latitude"] = df["latitude"].astype(float)
+    #df["latitude"] = df["latitude"].astype(float)
     df["longitude"] = df["longitude"].astype(float)
     df["quality"] = df["quality"].astype(float)
     df["nsats"] = df["nsats"].astype(float)
