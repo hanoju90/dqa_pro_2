@@ -96,12 +96,15 @@ def philamh_to_xyz(phi, lam, h, a, b):
   xyz_array = np.array([X, Y, Z])
   return xyz_array
 
-def df_deg_dec(df, xyz_array):
+def df_deg_dec(df):
     df['latitude'] = calc_deg(df['latitude'])
     df['longitude'] = calc_deg(df['longitude'])
-    df['X'] = xyz_array[:, 0]
-    df['Y'] = xyz_array[:, 1]
-    df['Z'] = xyz_array[:, 2]
+    return df
+
+def df_add_xyz(df, xyz_array):
+    df['X'] = xyz_array[0, :]
+    df['Y'] = xyz_array[1, :]
+    df['Z'] = xyz_array[2, :]
     return df
 
 print(zx1_15_geo)
@@ -126,5 +129,3 @@ def create_rotation_matrix(lam, phi):
 def calc_height(df):
     df['height'] = df['geoidheight'] + df['geoidundulation']
     return df
-
-xyz_array = philamh_to_xyz(zx2_15_geo['latitude'], zx2_15_geo['longitude'], zx2_15_geo['height'], )
