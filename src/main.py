@@ -105,3 +105,5 @@ def create_rotation_matrix_NEU(lam, phi):
                     [-np.sin(phi) * np.sin(lam), np.cos(lam), np.cos(phi) * np.sin(lam)],
                     [np.cos(phi), 0, np.sin(phi)]])
   return R_NEU.T
+
+#test
