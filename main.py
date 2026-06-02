@@ -43,8 +43,8 @@ def read_nmea(nmea_file):
         "check"
     ])
 
-    df["latitude"] = df["time"].astype(float)
-    #df["latitude"] = df["latitude"].astype(float)
+    df["time"] = df["time"].astype(float)
+    df["latitude"] = df["latitude"].astype(float)
     df["longitude"] = df["longitude"].astype(float)
     df["quality"] = df["quality"].astype(float)
     df["nsats"] = df["nsats"].astype(float)
@@ -59,6 +59,8 @@ zx1_16_geo = read_nmea(zx1_16_path)
 zx2_15_geo = read_nmea(zx2_15_path)
 zx2_16_geo = read_nmea(zx2_16_path)
 
+print(zx1_15_geo.to_string())
+
 def calc_deg(deg_min):
     min = (deg_min % 100) / 60
     deg = (deg_min // 100)
@@ -71,12 +73,4 @@ def geo_to_ecef(df):
     df.latitude = calc_deg(df.latitude)
 
     return df
-
-zx1_15_ecef = geo_to_ecef(zx1_15_geo)
-print(zx1_15_ecef)
-print(zx1_16_geo)
-
-
-#push 11:43
-
 
