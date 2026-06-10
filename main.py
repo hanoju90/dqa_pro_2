@@ -1,13 +1,14 @@
-import numpy as np
 import function as f
+import matplotlib.pyplot as plt
 
 a_wgs84 = 6378137.00000  # m
 b_wgs84 = 6356752.31425  # m
 
 zx1_15_path = "data/ZX1_2005-11-15_1105-1135_GGA-only.TXT"
 zx1_16_path = "data/ZX1_2005-11-16_1100-1130_GGA-only.TXT"
-zx2_15_path = "data/ZX1_2005-11-15_1105-1135_GGA-only.TXT"
-zx2_16_path = "data/ZX1_2005-11-16_1100-1130_GGA-only.TXT"
+zx2_15_path = "data/ZX2_2005-11-15_1105-1135_GGA-only.TXT"
+zx2_16_path = "data/ZX2_2005-11-16_1100-1130_GGA-only.TXT"
+
 
 zx1_15_geo = f.read_nmea(zx1_15_path)
 zx1_16_geo = f.read_nmea(zx1_16_path)
@@ -23,8 +24,7 @@ zx1_15_geo = f.df_deg_dec(zx1_15_geo)
 zx1_16_geo = f.df_deg_dec(zx1_16_geo)
 zx2_15_geo = f.df_deg_dec(zx2_15_geo)
 zx2_16_geo = f.df_deg_dec(zx2_16_geo)
-print(zx1_15_geo.to_string())
-"""
+
 zx1_15_xyz = f.philamh_to_xyz(zx1_15_geo['latitude'], zx1_15_geo['longitude'], zx1_15_geo['height'], a_wgs84, b_wgs84)
 zx1_16_xyz = f.philamh_to_xyz(zx1_16_geo['latitude'], zx1_16_geo['longitude'], zx1_16_geo['height'], a_wgs84, b_wgs84)
 zx2_15_xyz = f.philamh_to_xyz(zx2_15_geo['latitude'], zx2_15_geo['longitude'], zx2_15_geo['height'], a_wgs84, b_wgs84)
@@ -35,51 +35,20 @@ df_zx1_16 = f.df_add_xyz(zx1_16_geo, zx1_16_xyz)
 df_zx2_15 = f.df_add_xyz(zx2_15_geo, zx2_15_xyz)
 df_zx2_16 = f.df_add_xyz(zx2_16_geo, zx2_16_xyz)
 
-#mean phi lam coords
-phi_mean_zx1_15, lam_mean_zx1_15 = f.calc_mean_philam(df_zx1_15)
-phi_mean_zx1_16, lam_mean_zx1_16 = f.calc_mean_philam(df_zx1_16)
-phi_mean_zx2_15, lam_mean_zx2_15 = f.calc_mean_philam(df_zx2_15)
-phi_mean_zx2_16, lam_mean_zx2_16 = f.calc_mean_philam(df_zx2_16)
 
-xyz_mean_zx1_15 = f.calc_mean_xyz(df_zx1_15)
-xyz_mean_zx1_16 = f.calc_mean_xyz(df_zx1_16)
-xyz_mean_zx2_15 = f.calc_mean_xyz(df_zx2_15)
-xyz_mean_zx2_16 = f.calc_mean_xyz(df_zx2_16)
-
-zx1_15_R = f.create_rotation_matrix(phi_mean_zx1_15, lam_mean_zx1_15)
-zx1_16_R = f.create_rotation_matrix(phi_mean_zx1_16, lam_mean_zx1_16)
-zx2_15_R = f.create_rotation_matrix(phi_mean_zx2_15, lam_mean_zx2_15)
-zx2_16_R = f.create_rotation_matrix(phi_mean_zx2_16, lam_mean_zx2_16)
-
-zx1_15_ll = zx1_15_R @  zx1_15_xyz
-zx_16_ll =  zx1_16_R @ zx1_16_xyz
-zx2_15_ll = zx2_15_R @ zx2_15_xyz
-zx2_16_ll = zx2_16_R @ zx2_16_xyz
-
-zx1_15_ll, zx1_15_mean = f.dX_local_level(zx1_15_xyz, phi_mean_zx1_15, lam_mean_zx1_15, xyz_mean_zx1_15)
-zx1_16_ll, zx1_16_mean = f.dX_local_level(zx1_16_xyz, phi_mean_zx1_16, lam_mean_zx1_16, xyz_mean_zx1_16)
-zx2_15_ll, zx2_15_mean = f.dX_local_level(zx2_15_xyz, phi_mean_zx2_15, lam_mean_zx2_15, xyz_mean_zx2_15)
-zx2_16_ll, zx2_16_mean = f.dX_local_level(zx2_16_xyz, phi_mean_zx2_16, lam_mean_zx2_16, xyz_mean_zx2_16)
-
-print(zx1_15_ll.shape)
-
-import matplotlib.pyplot as plt
-
-def plot_xy(arr, mean):
-    plt.figure(figsize=(6, 6))
-    plt.scatter(arr[:, 0], arr[:, 1], s=1)
-    plt.scatter(mean[0], mean[1], s=2, color='red')
-    plt.xlabel("X")
-    plt.ylabel("Y")
-    plt.axis("equal")
-    plt.grid(True)
-    plt.show()
-
-plot_xy(zx1_15_ll, zx1_15_mean)
-plot_xy(zx1_16_ll, zx1_16_mean)
-plot_xy(zx2_15_ll, zx2_15_mean)
-plot_xy(zx2_16_ll, zx2_16_mean)
-"""
+#######################################################
+df_zx1_15["north"], df_zx1_15["east"], df_zx1_15["up"] = f.ecef_to_neu(df_zx1_15)
 
 
+print(df_zx1_15[["north", "east", "up"]].mean())
+print(df_zx1_15[["north", "east", "up"]].std())
 
+
+plt.figure(figsize=(6, 6))
+plt.scatter(df_zx1_15["east"], df_zx1_15["north"], s=5)
+plt.xlabel("East [m]")
+plt.ylabel("North [m]")
+plt.title("Horizontal scatter in local NEU system")
+plt.axis("equal")
+plt.grid(True)
+plt.show()
