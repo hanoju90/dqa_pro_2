@@ -49,22 +49,20 @@ def read_nmea(nmea_file):
 
     return df
 
-
 def calc_height(df):
     df['height'] = df['geoidheight'] + df['geoidundulation']
     return df
 
 def calc_deg(deg_min):
-    min = (deg_min % 100) / 60
+    minutes = (deg_min % 100) / 60
     deg = (deg_min // 100)
-    deg_dec = min + deg
-    return deg_dec
+    deg_dec = minutes + deg
 
-def geo_to_ecef(df):
-    h = df.geoidheight + df.geoidundulation
+    return np.radians(deg_dec)
 
-    df.latitude = calc_deg(df.latitude)
-
+def df_deg_dec(df):
+    df['latitude'] = calc_deg(df['latitude'])
+    df['longitude'] = calc_deg(df['longitude'])
     return df
 
 def philamh_to_xyz(phi, lam, h, a, b):
@@ -87,54 +85,14 @@ def philamh_to_xyz(phi, lam, h, a, b):
   Y = (c/V + h) * np.cos(phi) * np.sin(lam)
   Z = (b/V + h) * np.sin(phi)
   xyz_array = np.array([X, Y, Z])
-  return xyz_array
 
-def df_deg_dec(df):
-    df['latitude'] = calc_deg(df['latitude'])
-    df['longitude'] = calc_deg(df['longitude'])
-    return df
+  return xyz_array
 
 def df_add_xyz(df, xyz_array):
     df['X'] = xyz_array[0, :]
     df['Y'] = xyz_array[1, :]
     df['Z'] = xyz_array[2, :]
     return df
-
-def create_rotation_matrix(lam, phi):
-  '''
-  Create rotation matrix to go from ECEF to N-E-D at a specific position
-      Args:
-          pos_xyz: ECEF coordinates of the position for which the rotation matrix should be calculated
-
-      Returns: numpy array of the rotation matrix
-  '''
-  lam = np.squeeze(lam)
-  phi = np.squeeze(phi)
-  lam = np.radians(lam)
-  phi = np.radians(phi)
-  R_NED = np.array([[-np.sin(phi) * np.cos(lam), -np.sin(lam), np.cos(phi) * -np.cos(lam)],
-                        [-np.sin(phi) * np.sin(lam), np.cos(lam), np.cos(phi) * -np.sin(lam)],
-                        [np.cos(phi), 0, -np.sin(phi)]])
-  return R_NED
-
-def dX_local_level(xyz_array, phi_mean, lam_mean, xyz_mean):
-  Rll = create_rotation_matrix(lam_mean, phi_mean)
-  Xll_mean = Rll @ xyz_mean
-  Xll_arr = Rll @ xyz_array
-  dXll = Xll_arr.T - Xll_mean
-  norm = np.linalg.norm(dXll, axis=0)
-  ell_rs = dXll / norm
-  return ell_rs, Xll_mean
-
-def dX_local_level_new(xyz_array, phi_mean, lam_mean, xyz_mean):
-    #print(xyz_array.shape)
-    Rll = create_rotation_matrix(lam_mean, phi_mean)
-    #print(Rll.shape)
-    #print(xyz_mean.shape)
-    #dXll = Rll @ (xyz_array.T - xyz_mean)
-
-    dXll = (Rll @ xyz_array.T).T - (Rll @ xyz_mean)
-    return dXll
 
 
 def calc_mean_philam(df):
@@ -149,30 +107,35 @@ def calc_mean_xyz(df):
     xyz_mean = np.array([x_mean, y_mean, z_mean])
     return xyz_mean
 
-def plot_north_diff(df, system, place_name):
-  fig, ax = plt.subplots()
-  ax.plot(df['time'], df['north'],
-                 label='$s_0$ ohne Gewichtung', color='blue')
-  ax.plot(df['time'], df['east'],
-                 label='$s_0$ mit Gewichtung', color='red')
-  ax.plot(df['time'], df['up'],
-          label='$s_0$ mit Gewichtung', color='red')
-  ax.set_ylabel('$s_0$ [m]')
-  ax.set_xlabel('Zeit')
-  ax.legend(loc='upper left')
-  ax.grid(True)
 
-  ticks = pd.date_range(
-      start=df['time'].min(),
-      end=df['time'].max(),
-      freq='15min'
-  )
-  ax.set_xticks(ticks)
-  ax.set_xticklabels([t.strftime('%H:%M') for t in ticks])
-  ax.set_yticks(np.arange(0, 25, 2))
-  fig.suptitle(f'Standardabweichung – {place_name}', fontsize=14)
-  plt.title(f'{system}', fontsize=12)
-  plt.savefig(f"Results/std-{place_name}-{system}.png")
-  plt.show()
-  plt.close()
+def rot_ned_to_ecef(phi, lam):
+    """Rotation matrix from gnss ws2025/26"""
+    return np.array([
+        [-np.sin(phi) * np.cos(lam), -np.sin(lam), -np.cos(phi) * np.cos(lam)],
+        [-np.sin(phi) * np.sin(lam), np.cos(lam), -np.cos(phi) * np.sin(lam)],
+        [np.cos(phi), 0.0, -np.sin(phi)]
+    ])
 
+
+
+
+###########################################################
+
+def ecef_to_neu(df):
+    phi_mean, lam_mean = calc_mean_philam(df)
+
+    phi_mean = np.radians(phi_mean)
+    lam_mean = np.radians(lam_mean)
+
+    xyz_mean = calc_mean_xyz(df)
+    xyz = df[["X", "Y", "Z"]].to_numpy()
+    dxyz = xyz - xyz_mean
+
+    R_ecef_to_ned = rot_ned_to_ecef(phi_mean, lam_mean).T
+    ned = dxyz @ R_ecef_to_ned.T
+
+    north = ned[:, 0]
+    east = ned[:, 1]
+    up = -ned[:, 2]   # D -> U
+
+    return north, east, up
