@@ -1,5 +1,6 @@
 import numpy as np
 import pandas as pd
+import matplotlib.pyplot as plt
 
 def read_nmea(nmea_file):
     output = []
@@ -124,9 +125,6 @@ def rot_ned_to_ecef(phi, lam):
 def ecef_to_neu(df):
     phi_mean, lam_mean = calc_mean_philam(df)
 
-    phi_mean = np.radians(phi_mean)
-    lam_mean = np.radians(lam_mean)
-
     xyz_mean = calc_mean_xyz(df)
     xyz = df[["X", "Y", "Z"]].to_numpy()
     dxyz = xyz - xyz_mean
@@ -139,3 +137,58 @@ def ecef_to_neu(df):
     up = -ned[:, 2]   # D -> U
 
     return north, east, up
+
+
+def plot_neu_scatter(df, title):
+    plt.figure(figsize=(6, 6))
+
+    plt.xlabel("East [m]")
+    plt.ylabel("North [m]")
+
+    plt.suptitle("Horizontal Scatter North-East-Up", fontsize=14)
+    plt.title(title, fontsize=12)
+
+    plt.scatter(df["east"], df["north"], s=50, edgecolors="black", linewidths=0.3, color="blue", label="Measurements")
+    plt.scatter(df["east"].mean(), df["north"].mean(), s=15, color="red", label="Mean Position")
+
+    plt.xticks(np.linspace(-2, 2, 9))
+    plt.yticks(np.linspace(-2, 2, 9))
+
+    plt.xlim(-2.4, 2.4)
+    plt.ylim(-2.4, 2.4)
+
+    plt.grid(True)
+    plt.legend()
+    plt.show()
+
+
+def geometric_distance(df1, df2):
+    df_pair = pd.merge(
+        df1[["time", "X", "Y", "Z"]],
+        df2[["time", "X", "Y", "Z"]],
+        on="time",
+        suffixes=("_1", "_2")
+    )
+
+    df_pair["distance"] = np.sqrt(
+        (df_pair["X_2"] - df_pair["X_1"])**2 +
+        (df_pair["Y_2"] - df_pair["Y_1"])**2 +
+        (df_pair["Z_2"] - df_pair["Z_1"])**2
+    )
+
+    df_distance = df_pair[["time", "distance"]].copy()
+
+    return df_distance
+
+def plot_distance_timeseries(df, title):
+    plt.figure(figsize=(10, 3))
+    plt.plot(df["time"], df["distance"], color="blue")
+
+    plt.xlabel("Time")
+    plt.ylabel("Distance [m]")
+
+    plt.title(f"Distance Time Series\n{title}", fontsize=12)
+
+    plt.grid(True)
+    plt.tight_layout()
+    plt.show()
