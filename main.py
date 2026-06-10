@@ -4,6 +4,9 @@ import matplotlib.pyplot as plt
 a_wgs84 = 6378137.00000  # m
 b_wgs84 = 6356752.31425  # m
 
+day1 = '15.11.2005'
+day2 = '16.11.2005'
+
 zx1_15_path = "data/ZX1_2005-11-15_1105-1135_GGA-only.TXT"
 zx1_16_path = "data/ZX1_2005-11-16_1100-1130_GGA-only.TXT"
 zx2_15_path = "data/ZX2_2005-11-15_1105-1135_GGA-only.TXT"
@@ -14,6 +17,11 @@ zx1_15_geo = f.read_nmea(zx1_15_path)
 zx1_16_geo = f.read_nmea(zx1_16_path)
 zx2_15_geo = f.read_nmea(zx2_15_path)
 zx2_16_geo = f.read_nmea(zx2_16_path)
+
+zx1_15_geo = f.convert_time(zx1_15_geo)
+zx1_16_geo = f.convert_time(zx1_16_geo)
+zx2_15_geo = f.convert_time(zx2_15_geo)
+zx2_16_geo = f.convert_time(zx2_16_geo)
 
 zx1_15_geo = f.calc_height(zx1_15_geo)
 zx1_16_geo = f.calc_height(zx1_16_geo)
@@ -38,12 +46,14 @@ df_zx2_16 = f.df_add_xyz(zx2_16_geo, zx2_16_xyz)
 
 #######################################################
 df_zx1_15["north"], df_zx1_15["east"], df_zx1_15["up"] = f.ecef_to_neu(df_zx1_15)
-
+df_zx1_16["north"], df_zx1_16["east"], df_zx1_16["up"] = f.ecef_to_neu(df_zx1_16)
+df_zx2_15["north"], df_zx2_15["east"], df_zx2_15["up"] = f.ecef_to_neu(df_zx2_15)
+df_zx2_16["north"], df_zx2_16["east"], df_zx2_16["up"] = f.ecef_to_neu(df_zx2_16)
 
 print(df_zx1_15[["north", "east", "up"]].mean())
 print(df_zx1_15[["north", "east", "up"]].std())
 
-
+'''
 plt.figure(figsize=(6, 6))
 plt.scatter(df_zx1_15["east"], df_zx1_15["north"], s=5)
 plt.xlabel("East [m]")
@@ -51,4 +61,14 @@ plt.ylabel("North [m]")
 plt.title("Horizontal scatter in local NEU system")
 plt.axis("equal")
 plt.grid(True)
-plt.show()
+plt.show()'''
+print(df_zx1_15)
+f.plot_neu_diff_timeline(df_zx1_15, 'Receiver 1' , day1)
+f.plot_neu_diff_timeline(df_zx1_16, 'Receiver 1' ,day2)
+f.plot_neu_diff_timeline(df_zx2_15, 'Receiver 2' ,day1)
+f.plot_neu_diff_timeline(df_zx2_16, 'Receiver 2' ,day2)
+
+f.plot_hdop_timeline(df_zx1_15, 'Receiver 1' , day1)
+f.plot_hdop_timeline(df_zx1_16, 'Receiver 1' ,day2)
+f.plot_hdop_timeline(df_zx2_15, 'Receiver 2' ,day1)
+f.plot_hdop_timeline(df_zx2_16, 'Receiver 2' ,day2)

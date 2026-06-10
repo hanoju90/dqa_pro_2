@@ -1,5 +1,7 @@
 import numpy as np
 import pandas as pd
+import matplotlib.pyplot as plt
+import matplotlib.dates as mdates
 
 def read_nmea(nmea_file):
     output = []
@@ -47,6 +49,10 @@ def read_nmea(nmea_file):
     df["geoidheight"] = df["geoidheight"].astype(float)
     df["geoidundulation"] = df["geoidundulation"].astype(float)
 
+    return df
+
+def convert_time(df):
+    df["time"] = pd.to_datetime(df["time"], format='%H%M%S')
     return df
 
 def calc_height(df):
@@ -124,9 +130,6 @@ def rot_ned_to_ecef(phi, lam):
 def ecef_to_neu(df):
     phi_mean, lam_mean = calc_mean_philam(df)
 
-    phi_mean = np.radians(phi_mean)
-    lam_mean = np.radians(lam_mean)
-
     xyz_mean = calc_mean_xyz(df)
     xyz = df[["X", "Y", "Z"]].to_numpy()
     dxyz = xyz - xyz_mean
@@ -139,3 +142,49 @@ def ecef_to_neu(df):
     up = -ned[:, 2]   # D -> U
 
     return north, east, up
+
+def plot_neu_diff_timeline(df, receiver, day):
+  fig, ax = plt.subplots()
+  ax.plot(df['time'], df['north'],
+                 label='North', color='red')
+  ax.plot(df['time'], df['east'],
+                 label='East', color='green')
+  ax.plot(df['time'], df['up'],
+                 label='Up', color='blue')
+  ax.set_ylabel('Difference [m]')
+  ax.set_xlabel('Time')
+  ax.legend(loc='upper right')
+  ax.grid(True)
+
+  locator = mdates.AutoDateLocator()
+  ax.xaxis.set_major_locator(locator)
+  ax.xaxis.set_major_formatter(mdates.DateFormatter("%H:%M"))
+  ax.set_yticks(np.arange(0, 5))
+  fig.suptitle(f'Difference North-East-Up', fontsize=14)
+  plt.title(f'{day} - {receiver}', fontsize=12)
+  #plt.savefig(f"Results/std-{place_name}-{system}.png")
+  plt.show()
+  #plt.close()
+
+def plot_hdop_timeline(df, receiver, day):
+  fig, ax = plt.subplots()
+  ax.plot(df['time'], df['hdop'], color='red', label=f'HDOP')
+  ax.set_xlabel("Time")
+  ax.set_ylabel("HDOP")
+
+  '''start = DOP_df['time'].min()
+  end = DOP_df['time'].max()'''
+
+  #ticks = pd.date_range(start=start, end=end, freq='15min')
+  locator = mdates.AutoDateLocator()
+  ax.xaxis.set_major_locator(locator)
+  ax.xaxis.set_major_formatter(mdates.DateFormatter("%H:%M"))
+  #ax.set_yticks(np.arange(0, 3.5, 0.5))
+  fig.suptitle(f"HDOP :", fontsize=14)
+  plt.title(f'{day} - {receiver}', fontsize=12)
+  ax.legend(loc='upper right')
+  plt.legend()
+  plt.grid()
+  #plt.savefig(f"Results/{place_name}-{system}-{dop_type_1}-{dop_type_2}.png")
+  plt.show()
+  #plt.close()
