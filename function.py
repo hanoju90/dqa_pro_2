@@ -148,3 +148,4 @@ def calc_mean_xyz(df):
     z_mean = df['Z'].mean()
     xyz_mean = np.array([x_mean, y_mean, z_mean])
     return xyz_mean
+
