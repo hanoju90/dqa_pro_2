@@ -234,3 +234,7 @@ def plot_hdop_timeline(df, receiver, day):
   plt.legend()
   plt.grid()
   plt.show()
+
+def export_df_as_csv(df, filename):
+    df["time"] = df["time"].dt.strftime("%H:%M:%S")
+    df.to_csv(f'{filename}.csv', sep=';', encoding='utf-8', index=False, header=True)
