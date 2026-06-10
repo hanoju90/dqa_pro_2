@@ -1,11 +1,6 @@
 import numpy as np
 import pandas as pd
 
-zx1_15_path = "data/ZX1_2005-11-15_1105-1135_GGA-only.TXT"
-zx1_16_path = "data/ZX1_2005-11-16_1100-1130_GGA-only.TXT"
-zx2_15_path = "data/ZX1_2005-11-15_1105-1135_GGA-only.TXT"
-zx2_16_path = "data/ZX1_2005-11-16_1100-1130_GGA-only.TXT"
-
 def read_nmea(nmea_file):
     output = []
 
@@ -54,12 +49,10 @@ def read_nmea(nmea_file):
 
     return df
 
-zx1_15_geo = read_nmea(zx1_15_path)
-zx1_16_geo = read_nmea(zx1_16_path)
-zx2_15_geo = read_nmea(zx2_15_path)
-zx2_16_geo = read_nmea(zx2_16_path)
 
-
+def calc_height(df):
+    df['height'] = df['geoidheight'] + df['geoidundulation']
+    return df
 
 def calc_deg(deg_min):
     min = (deg_min % 100) / 60
@@ -131,11 +124,9 @@ def dX_local_level(xyz_array, phi_mean, lam_mean, xyz_mean):
   dXll = Xll_arr.T - Xll_mean
   norm = np.linalg.norm(dXll, axis=0)
   ell_rs = dXll / norm
-  return ell_rs
+  return ell_rs, Xll_mean
 
-def calc_height(df):
-    df['height'] = df['geoidheight'] + df['geoidundulation']
-    return df
+
 
 def calc_mean_philam(df):
     phi_mean = df['latitude'].mean()
