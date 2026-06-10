@@ -126,6 +126,15 @@ def dX_local_level(xyz_array, phi_mean, lam_mean, xyz_mean):
   ell_rs = dXll / norm
   return ell_rs, Xll_mean
 
+def dX_local_level_new(xyz_array, phi_mean, lam_mean, xyz_mean):
+    #print(xyz_array.shape)
+    Rll = create_rotation_matrix(lam_mean, phi_mean)
+    #print(Rll.shape)
+    #print(xyz_mean.shape)
+    #dXll = Rll @ (xyz_array.T - xyz_mean)
+
+    dXll = (Rll @ xyz_array.T).T - (Rll @ xyz_mean)
+    return dXll
 
 
 def calc_mean_philam(df):
@@ -139,4 +148,31 @@ def calc_mean_xyz(df):
     z_mean = df['Z'].mean()
     xyz_mean = np.array([x_mean, y_mean, z_mean])
     return xyz_mean
+
+def plot_north_diff(df, system, place_name):
+  fig, ax = plt.subplots()
+  ax.plot(df['time'], df['north'],
+                 label='$s_0$ ohne Gewichtung', color='blue')
+  ax.plot(df['time'], df['east'],
+                 label='$s_0$ mit Gewichtung', color='red')
+  ax.plot(df['time'], df['up'],
+          label='$s_0$ mit Gewichtung', color='red')
+  ax.set_ylabel('$s_0$ [m]')
+  ax.set_xlabel('Zeit')
+  ax.legend(loc='upper left')
+  ax.grid(True)
+
+  ticks = pd.date_range(
+      start=df['time'].min(),
+      end=df['time'].max(),
+      freq='15min'
+  )
+  ax.set_xticks(ticks)
+  ax.set_xticklabels([t.strftime('%H:%M') for t in ticks])
+  ax.set_yticks(np.arange(0, 25, 2))
+  fig.suptitle(f'Standardabweichung – {place_name}', fontsize=14)
+  plt.title(f'{system}', fontsize=12)
+  plt.savefig(f"Results/std-{place_name}-{system}.png")
+  plt.show()
+  plt.close()
 
