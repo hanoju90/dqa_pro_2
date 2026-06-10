@@ -258,7 +258,12 @@ def plot_distance_timeseries(df, title):
 def plot_sample_autocorrelation(lags, acf, title):
     plt.figure(figsize=(10, 3))
 
-    plt.plot(lags, acf, color="blue")
+    mask = (lags % 5 == 0)
+    markerline, stemlines, baseline = plt.stem(lags[mask], acf[mask])
+
+    plt.setp(markerline, color="blue")
+    plt.setp(stemlines, color="blue")
+    plt.setp(baseline, color="red")
 
     plt.xlabel("Lag [s]")
     plt.ylabel("Sample autocorrelation")
