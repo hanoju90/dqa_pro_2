@@ -72,3 +72,5 @@ f.plot_hdop_timeline(df_zx1_15, 'Receiver 1' , day1)
 f.plot_hdop_timeline(df_zx1_16, 'Receiver 1' ,day2)
 f.plot_hdop_timeline(df_zx2_15, 'Receiver 2' ,day1)
 f.plot_hdop_timeline(df_zx2_16, 'Receiver 2' ,day2)
+
+#12:06
