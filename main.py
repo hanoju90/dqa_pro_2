@@ -78,15 +78,7 @@ f.plot_distance_timeseries(df_dist_zx1_zx2_15, "Antenna 1 & 2, 15.11.2005")
 f.plot_distance_timeseries(df_dist_zx1_zx2_16, "Antenna 1 & 2, 16.11.2005")
 f.plot_distance_timeseries(df_dist_zx1_15_zx1_16, "Antenna 1 & 1, 15.-16.11.2005")
 f.plot_distance_timeseries(df_dist_zx2_15_zx2_16, "Antenna 1 & 1 15.-16.11.2005")
-'''
-plt.figure(figsize=(6, 6))
-plt.scatter(df_zx1_15["east"], df_zx1_15["north"], s=5)
-plt.xlabel("East [m]")
-plt.ylabel("North [m]")
-plt.title("Horizontal scatter in local NEU system")
-plt.axis("equal")
-plt.grid(True)
-plt.show()'''
+
 print(df_zx1_15)
 f.plot_neu_diff_timeline(df_zx1_15, 'Receiver 1' , day1)
 f.plot_neu_diff_timeline(df_zx1_16, 'Receiver 1' ,day2)
@@ -97,5 +89,3 @@ f.plot_hdop_timeline(df_zx1_15, 'Receiver 1' , day1)
 f.plot_hdop_timeline(df_zx1_16, 'Receiver 1' ,day2)
 f.plot_hdop_timeline(df_zx2_15, 'Receiver 2' ,day1)
 f.plot_hdop_timeline(df_zx2_16, 'Receiver 2' ,day2)
-
-#12:06

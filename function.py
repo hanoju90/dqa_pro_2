@@ -197,6 +197,7 @@ def plot_distance_timeseries(df, title):
     plt.grid(True)
     plt.tight_layout()
     plt.show()
+
 def plot_neu_diff_timeline(df, receiver, day):
   fig, ax = plt.subplots()
   ax.plot(df['time'], df['north'],
@@ -216,9 +217,7 @@ def plot_neu_diff_timeline(df, receiver, day):
   ax.set_yticks(np.arange(0, 5))
   fig.suptitle(f'Difference North-East-Up', fontsize=14)
   plt.title(f'{day} - {receiver}', fontsize=12)
-  #plt.savefig(f"Results/std-{place_name}-{system}.png")
   plt.show()
-  #plt.close()
 
 def plot_hdop_timeline(df, receiver, day):
   fig, ax = plt.subplots()
@@ -226,22 +225,12 @@ def plot_hdop_timeline(df, receiver, day):
   ax.set_xlabel("Time")
   ax.set_ylabel("HDOP")
 
-  '''start = DOP_df['time'].min()
-  end = DOP_df['time'].max()'''
-
-  #ticks = pd.date_range(start=start, end=end, freq='15min')
   locator = mdates.AutoDateLocator()
   ax.xaxis.set_major_locator(locator)
   ax.xaxis.set_major_formatter(mdates.DateFormatter("%H:%M"))
-  #ax.set_yticks(np.arange(0, 3.5, 0.5))
   fig.suptitle(f"HDOP :", fontsize=14)
   plt.title(f'{day} - {receiver}', fontsize=12)
   ax.legend(loc='upper right')
   plt.legend()
   plt.grid()
-  #plt.savefig(f"Results/{place_name}-{system}-{dop_type_1}-{dop_type_2}.png")
   plt.show()
-  #plt.close()
-
-
-#12:06
