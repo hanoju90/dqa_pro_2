@@ -1,14 +1,5 @@
 import function as f
 
-
-
-# Anzahl der sichtbaren Satelliten im HDOP einzeichnen
-# Achsen bei allen Plots genau gleich wählen
-
-
-
-
-
 a_wgs84 = 6378137.00000  # m
 b_wgs84 = 6356752.31425  # m
 

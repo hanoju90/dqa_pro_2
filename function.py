@@ -2,6 +2,7 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
+from matplotlib.ticker import MaxNLocator
 
 # preprocessing
 def read_nmea(nmea_file):
@@ -228,18 +229,35 @@ def plot_neu_diff_timeline(df, receiver, day):
     plt.show()
 
 def plot_hdop_timeline(df, receiver, day):
-    fig, ax = plt.subplots()
-    ax.plot(df['time'], df['hdop'], color='red', label=f'HDOP')
-    ax.set_xlabel("Time")
-    ax.set_ylabel("HDOP")
+    fig, ax1 = plt.subplots()
+
+    ax1.plot(df['time'], df['hdop'], color='red', label='HDOP')
+    ax1.set_xlabel("Time")
+    ax1.set_ylabel("HDOP")
+    ax1.tick_params(axis='y')
+    ax1.set_ylim(0.8, 1.1)
+
+    ax2 = ax1.twinx()
+    ax2.plot(df['time'], df['nsats'], color='blue', label='# of Satellites')
+    ax2.set_ylabel("# of visible Satellites")
+    ax2.tick_params(axis='y')
+
+    ns_min = int(df['nsats'].min())
+    ns_max = int(df['nsats'].max())
+    ax2.set_ylim(ns_min - 1.1, ns_max + 1.1)
+    ax2.set_yticks(range(ns_min - 1, ns_max + 2))
 
     locator = mdates.AutoDateLocator()
-    ax.xaxis.set_major_locator(locator)
-    ax.xaxis.set_major_formatter(mdates.DateFormatter("%H:%M"))
+    ax1.xaxis.set_major_locator(locator)
+    ax1.xaxis.set_major_formatter(mdates.DateFormatter("%H:%M"))
+
     plt.title(f"HDOP\n{day} - {receiver}", fontsize=12)
-    ax.legend(loc='upper right')
-    plt.legend()
-    plt.grid()
+
+    lines1, labels1 = ax1.get_legend_handles_labels()
+    lines2, labels2 = ax2.get_legend_handles_labels()
+    ax1.legend(lines1 + lines2, labels1 + labels2, loc='upper right')
+
+    ax1.grid()
     plt.show()
 
 def plot_distance_timeseries(df, title):
