@@ -213,7 +213,16 @@ def plot_neu_diff_timeline(df, receiver, day):
     locator = mdates.AutoDateLocator()
     ax.xaxis.set_major_locator(locator)
     ax.xaxis.set_major_formatter(mdates.DateFormatter("%H:%M"))
-    ax.set_yticks(np.arange(-2.5, 5.5, 1))
+
+    def add_padding(lim, pad_fraction=0.04):
+        low, high = lim
+        pad = (high - low) * pad_fraction
+        return low - pad, high + pad
+
+    y_limits_r = (-2, 4)
+    ax.set_ylim(add_padding(y_limits_r, pad_fraction=0.04))
+    ax.set_yticks(np.arange(-2, 5, 1))
+
     plt.title(f"Difference North-East-Up\n{day} - {receiver}", fontsize=12)
 
     plt.show()
