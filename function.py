@@ -131,8 +131,8 @@ def ecef_to_neu(df):
     xyz = df[["X", "Y", "Z"]].to_numpy()
     dxyz = xyz - xyz_mean
 
-    R_ecef_to_ned = rot_ned_to_ecef(phi_mean, lam_mean).T
-    ned = dxyz @ R_ecef_to_ned.T
+    R_ecef_to_ned = rot_ned_to_ecef(phi_mean, lam_mean)
+    ned = dxyz @ R_ecef_to_ned
 
     north = ned[:, 0]
     east = ned[:, 1]
@@ -162,6 +162,7 @@ def geometric_distance(df1, df2):
 
 def calc_sample_autocorrelation(x, max_lag):
     x = np.asarray(x, dtype=float)
+    print(len(x))
     x = x - np.mean(x)
     gamma_0 = np.sum(x*x)/len(x)
 
@@ -293,7 +294,7 @@ def plot_sample_autocorrelation(lags, acf, title):
     plt.setp(baseline, color="red")
 
     plt.xlabel("Lag [s]")
-    plt.ylabel("Sample autocorrelation")
+    plt.ylabel("Sample Autocorrelation")
 
     plt.title(f"Sample Autocorrelation Function\n{title}", fontsize=12)
 
