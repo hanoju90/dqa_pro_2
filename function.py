@@ -2,7 +2,9 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
+from matplotlib.ticker import MaxNLocator
 
+# preprocessing
 def read_nmea(nmea_file):
     output = []
 
@@ -100,7 +102,6 @@ def df_add_xyz(df, xyz_array):
     df['Z'] = xyz_array[2, :]
     return df
 
-
 def calc_mean_philam(df):
     phi_mean = df['latitude'].mean()
     lam_mean = df['longitude'].mean()
@@ -114,6 +115,7 @@ def calc_mean_xyz(df):
     return xyz_mean
 
 
+# transformation
 def rot_ned_to_ecef(phi, lam):
     """Rotation matrix from gnss ws2025/26"""
     return np.array([
@@ -122,11 +124,6 @@ def rot_ned_to_ecef(phi, lam):
         [np.cos(phi), 0.0, -np.sin(phi)]
     ])
 
-
-
-
-###########################################################
-
 def ecef_to_neu(df):
     phi_mean, lam_mean = calc_mean_philam(df)
 
@@ -134,8 +131,8 @@ def ecef_to_neu(df):
     xyz = df[["X", "Y", "Z"]].to_numpy()
     dxyz = xyz - xyz_mean
 
-    R_ecef_to_ned = rot_ned_to_ecef(phi_mean, lam_mean).T
-    ned = dxyz @ R_ecef_to_ned.T
+    R_ecef_to_ned = rot_ned_to_ecef(phi_mean, lam_mean)
+    ned = dxyz @ R_ecef_to_ned
 
     north = ned[:, 0]
     east = ned[:, 1]
@@ -144,29 +141,7 @@ def ecef_to_neu(df):
     return north, east, up
 
 
-def plot_neu_scatter(df, title):
-    plt.figure(figsize=(6, 6))
-
-    plt.xlabel("East [m]")
-    plt.ylabel("North [m]")
-
-    plt.suptitle("Horizontal Scatter North-East-Up", fontsize=14)
-    plt.title(title, fontsize=12)
-
-    plt.scatter(df["east"], df["north"], s=50, edgecolors="black", linewidths=0.3, color="blue", label="Measurements")
-    plt.scatter(df["east"].mean(), df["north"].mean(), s=15, color="red", label="Mean Position")
-
-    plt.xticks(np.linspace(-2, 2, 9))
-    plt.yticks(np.linspace(-2, 2, 9))
-
-    plt.xlim(-2.4, 2.4)
-    plt.ylim(-2.4, 2.4)
-
-    plt.grid(True)
-    plt.legend()
-    plt.show()
-
-
+# distance timeseries
 def geometric_distance(df1, df2):
     df_pair = pd.merge(
         df1[["time", "X", "Y", "Z"]],
@@ -185,56 +160,146 @@ def geometric_distance(df1, df2):
 
     return df_distance
 
-def plot_distance_timeseries(df, title):
-    plt.figure(figsize=(10, 3))
-    plt.plot(df["time"], df["distance"], color="blue")
+def calc_sample_autocorrelation(x, max_lag):
+    x = np.asarray(x, dtype=float)
+    print(len(x))
+    x = x - np.mean(x)
+    gamma_0 = np.sum(x*x)/len(x)
 
-    plt.xlabel("Time")
-    plt.ylabel("Distance [m]")
+    lags = np.arange(max_lag + 1)
+    acf = np.zeros(max_lag + 1)
 
-    plt.title(f"Distance Time Series\n{title}", fontsize=12)
+    for h in lags:
+        gamma_h = np.sum(x[:len(x)-h] * x[h:]) / len(x)
+        acf[h] = gamma_h / gamma_0
+
+    return lags, acf
+
+
+
+# plots
+def plot_neu_scatter(df, title):
+    plt.figure(figsize=(6, 6))
+
+    plt.xlabel("East [m]")
+    plt.ylabel("North [m]")
+
+    plt.title(f"Horizontal Scatter North-East-Up\n{title}", fontsize=12)
+
+    plt.scatter(df["east"], df["north"], s=50, edgecolors="black", linewidths=0.3, color="blue", label="Measurements")
+    plt.scatter(df["east"].mean(), df["north"].mean(), s=15, color="red", label="Mean Position")
+
+    plt.xticks(np.linspace(-2, 2, 9))
+    plt.yticks(np.linspace(-2, 2, 9))
+
+    plt.xlim(-2.4, 2.4)
+    plt.ylim(-2.4, 2.4)
 
     plt.grid(True)
-    plt.tight_layout()
+    plt.legend()
     plt.show()
 
 def plot_neu_diff_timeline(df, receiver, day):
-  fig, ax = plt.subplots()
-  ax.plot(df['time'], df['north'],
+    fig, ax = plt.subplots()
+    ax.plot(df['time'], df['north'],
                  label='North', color='red')
-  ax.plot(df['time'], df['east'],
+    ax.plot(df['time'], df['east'],
                  label='East', color='green')
-  ax.plot(df['time'], df['up'],
+    ax.plot(df['time'], df['up'],
                  label='Up', color='blue')
-  ax.set_ylabel('Difference [m]')
-  ax.set_xlabel('Time')
-  ax.legend(loc='upper right')
-  ax.grid(True)
+    ax.set_ylabel('Difference [m]')
+    ax.set_xlabel('Time')
+    ax.legend(loc='upper right')
+    ax.grid(True)
 
-  locator = mdates.AutoDateLocator()
-  ax.xaxis.set_major_locator(locator)
-  ax.xaxis.set_major_formatter(mdates.DateFormatter("%H:%M"))
-  ax.set_yticks(np.arange(0, 5))
-  fig.suptitle(f'Difference North-East-Up', fontsize=14)
-  plt.title(f'{day} - {receiver}', fontsize=12)
-  plt.show()
+    locator = mdates.AutoDateLocator()
+    ax.xaxis.set_major_locator(locator)
+    ax.xaxis.set_major_formatter(mdates.DateFormatter("%H:%M"))
+
+    def add_padding(lim, pad_fraction=0.04):
+        low, high = lim
+        pad = (high - low) * pad_fraction
+        return low - pad, high + pad
+
+    y_limits_r = (-2, 4)
+    ax.set_ylim(add_padding(y_limits_r, pad_fraction=0.04))
+    ax.set_yticks(np.arange(-2, 5, 1))
+
+    plt.title(f"Difference North-East-Up\n{day} - {receiver}", fontsize=12)
+
+    plt.show()
 
 def plot_hdop_timeline(df, receiver, day):
-  fig, ax = plt.subplots()
-  ax.plot(df['time'], df['hdop'], color='red', label=f'HDOP')
-  ax.set_xlabel("Time")
-  ax.set_ylabel("HDOP")
+    fig, ax1 = plt.subplots()
 
-  locator = mdates.AutoDateLocator()
-  ax.xaxis.set_major_locator(locator)
-  ax.xaxis.set_major_formatter(mdates.DateFormatter("%H:%M"))
-  fig.suptitle(f"HDOP :", fontsize=14)
-  plt.title(f'{day} - {receiver}', fontsize=12)
-  ax.legend(loc='upper right')
-  plt.legend()
-  plt.grid()
-  plt.show()
+    ax1.plot(df['time'], df['hdop'], color='red', label='HDOP')
+    ax1.set_xlabel("Time")
+    ax1.set_ylabel("HDOP")
+    ax1.tick_params(axis='y')
+    ax1.set_ylim(0.8, 1.1)
 
-def export_df_as_csv(df, filename):
-    df["time"] = df["time"].dt.strftime("%H:%M:%S")
-    df.to_csv(f'{filename}.csv', sep=';', encoding='utf-8', index=False, header=True)
+    ax2 = ax1.twinx()
+    ax2.plot(df['time'], df['nsats'], color='blue', label='# of Satellites')
+    ax2.set_ylabel("# of visible Satellites")
+    ax2.tick_params(axis='y')
+
+    ns_min = int(df['nsats'].min())
+    ns_max = int(df['nsats'].max())
+    ax2.set_ylim(ns_min - 1.1, ns_max + 1.1)
+    ax2.set_yticks(range(ns_min - 1, ns_max + 2))
+
+    locator = mdates.AutoDateLocator()
+    ax1.xaxis.set_major_locator(locator)
+    ax1.xaxis.set_major_formatter(mdates.DateFormatter("%H:%M"))
+
+    plt.title(f"HDOP\n{day} - {receiver}", fontsize=12)
+
+    lines1, labels1 = ax1.get_legend_handles_labels()
+    lines2, labels2 = ax2.get_legend_handles_labels()
+    ax1.legend(lines1 + lines2, labels1 + labels2, loc='upper right')
+
+    ax1.grid()
+    plt.show()
+
+def plot_distance_timeseries(df, title):
+    fig, ax = plt.subplots()
+
+    ax.plot(df["time"], df["distance"], color="blue")
+
+    ax.set_xlabel("Time")
+    ax.set_ylabel("Distance [m]")
+
+    plt.title(f"Distance Time Series\n{title}", fontsize=12)
+
+    locator = mdates.AutoDateLocator()
+    ax.xaxis.set_major_locator(locator)
+    ax.xaxis.set_major_formatter(mdates.DateFormatter("%H:%M"))
+
+    plt.yticks(np.linspace(-1, 9, 6))
+    plt.ylim(-1,9)
+
+    ax.grid(True)
+
+    plt.tight_layout()
+    plt.show()
+
+def plot_sample_autocorrelation(lags, acf, title):
+    plt.figure(figsize=(10, 3))
+
+    mask = (lags % 5 == 0)
+    markerline, stemlines, baseline = plt.stem(lags[mask], acf[mask])
+
+    plt.setp(markerline, color="blue")
+    plt.setp(stemlines, color="blue")
+    plt.setp(baseline, color="red")
+
+    plt.xlabel("Lag [s]")
+    plt.ylabel("Sample Autocorrelation")
+
+    plt.title(f"Sample Autocorrelation Function\n{title}", fontsize=12)
+
+    plt.ylim(-1.1, 1.1)
+    plt.grid(True)
+
+    plt.tight_layout()
+    plt.show()
