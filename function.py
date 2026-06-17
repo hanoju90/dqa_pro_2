@@ -2,7 +2,6 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
-from matplotlib.ticker import MaxNLocator
 
 # preprocessing
 def read_nmea(nmea_file):
@@ -65,7 +64,6 @@ def calc_deg(deg_min):
     minutes = (deg_min % 100) / 60
     deg = (deg_min // 100)
     deg_dec = minutes + deg
-
     return np.radians(deg_dec)
 
 def df_deg_dec(df):
@@ -74,17 +72,6 @@ def df_deg_dec(df):
     return df
 
 def philamh_to_xyz(phi, lam, h, a, b):
-  """
-          Function to convert geographic coordinates (phi, lambda, h) to ECEF (X,Y,Z) coordinates.
-          Args:
-            phi: phi coordinate of point
-            lam: lambda coordinate of point
-            h: ellipsoidal height of point
-            a: major semi axis of ellipsoid
-            b: minor semi axis of ellipsoid
-
-          Returns: numpy array with shape (X, Y, Z)
-      """
   c = (a**2)/b
   e_strich_sq = (a**2 - b**2)/b**2
   V = np.sqrt(1 + e_strich_sq*np.cos(phi)**2)
@@ -117,7 +104,6 @@ def calc_mean_xyz(df):
 
 # transformation
 def rot_ned_to_ecef(phi, lam):
-    """Rotation matrix from gnss ws2025/26"""
     return np.array([
         [-np.sin(phi) * np.cos(lam), -np.sin(lam), -np.cos(phi) * np.cos(lam)],
         [-np.sin(phi) * np.sin(lam), np.cos(lam), -np.cos(phi) * np.sin(lam)],
@@ -174,7 +160,6 @@ def calc_sample_autocorrelation(x, max_lag):
         acf[h] = gamma_h / gamma_0
 
     return lags, acf
-
 
 
 # plots
