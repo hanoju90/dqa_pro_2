@@ -3,6 +3,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 from matplotlib.ticker import MaxNLocator
+from mpl_toolkits.axes_grid1 import make_axes_locatable
 
 # preprocessing
 def read_nmea(nmea_file):
@@ -178,15 +179,22 @@ def calc_sample_autocorrelation(x, max_lag):
 
 
 # plots
-def plot_neu_scatter(df, title):
-    plt.figure(figsize=(6, 6))
+def plot_neu_scatter(df, title, day, receiver):
+    fig, ax = plt.subplots(figsize=(7, 6))
 
     plt.xlabel("East [m]")
     plt.ylabel("North [m]")
 
-    plt.title(f"Horizontal Scatter North-East-Up\n{title}", fontsize=12)
+    plt.title(f"Horizontal Scatter North-East-Up\n{title}-{receiver}", fontsize=12)
 
-    plt.scatter(df["east"], df["north"], s=50, edgecolors="black", linewidths=0.3, color="blue", label="Measurements")
+    scatter = ax.scatter(
+        df["east"],
+        df["north"],
+        c=np.arange(len(df)),
+        cmap="viridis",
+        s=10
+    )
+
     plt.scatter(df["east"].mean(), df["north"].mean(), s=15, color="red", label="Mean Position")
 
     plt.xticks(np.linspace(-2, 2, 9))
@@ -195,9 +203,20 @@ def plot_neu_scatter(df, title):
     plt.xlim(-2.4, 2.4)
     plt.ylim(-2.4, 2.4)
 
-    plt.grid(True)
-    plt.legend()
-    plt.show()
+    divider = make_axes_locatable(ax)
+    cax = divider.append_axes("right", size="4%", pad=0.08)
+    cbar = fig.colorbar(scatter, cax=cax)
+    cbar.set_label("Time")
+
+    n_ticks = 5
+    tick_positions = np.linspace(0, len(df) - 1, n_ticks, dtype=int)
+    cbar.set_ticks(tick_positions)
+    cbar.set_ticklabels([df["time"].iloc[i].strftime("%H:%M") for i in tick_positions])
+
+    ax.set_aspect("equal", adjustable="box")
+    ax.grid(True)
+    plt.tight_layout()
+    plt.savefig(f"plots/ll_scatter_{day}{receiver}.png", bbox_inches="tight", pad_inches=0.02, dpi=300)
 
 def plot_neu_diff_timeline(df, receiver, day):
     fig, ax = plt.subplots()
@@ -227,7 +246,8 @@ def plot_neu_diff_timeline(df, receiver, day):
 
     plt.title(f"Difference North-East-Up\n{day} - {receiver}", fontsize=12)
 
-    plt.show()
+    plt.tight_layout()
+    plt.savefig(f"plots/ll_timeline_{day}_{receiver}.png", bbox_inches="tight", pad_inches=0.02, dpi=300)
 
 def plot_hdop_timeline(df, receiver, day):
     fig, ax1 = plt.subplots()
@@ -252,16 +272,17 @@ def plot_hdop_timeline(df, receiver, day):
     ax1.xaxis.set_major_locator(locator)
     ax1.xaxis.set_major_formatter(mdates.DateFormatter("%H:%M"))
 
-    plt.title(f"HDOP\n{day} - {receiver}", fontsize=12)
+    plt.title(f"HDOP & Number Of Visible Satellites\n{day} - {receiver}", fontsize=12)
 
     lines1, labels1 = ax1.get_legend_handles_labels()
     lines2, labels2 = ax2.get_legend_handles_labels()
     ax1.legend(lines1 + lines2, labels1 + labels2, loc='upper right')
 
     ax1.grid()
-    plt.show()
+    plt.tight_layout()
+    plt.savefig(f"plots/hdop_timeline_{day}_{receiver}.png", bbox_inches="tight", pad_inches=0.02, dpi=300)
 
-def plot_distance_timeseries(df, title):
+def plot_distance_timeseries(df, title, day1, receiver1, day2=None, receiver2=None):
     fig, ax = plt.subplots()
 
     ax.plot(df["time"], df["distance"], color="blue")
@@ -275,15 +296,15 @@ def plot_distance_timeseries(df, title):
     ax.xaxis.set_major_locator(locator)
     ax.xaxis.set_major_formatter(mdates.DateFormatter("%H:%M"))
 
-    plt.yticks(np.linspace(-1, 9, 6))
-    plt.ylim(-1,9)
+    plt.yticks(np.linspace(0, 9, 10))
+    plt.ylim(0, 9)
 
     ax.grid(True)
 
     plt.tight_layout()
-    plt.show()
+    plt.savefig(f"plots/distance_timeline_{day1}_{day2}_{receiver1}_{receiver2}.png", bbox_inches="tight", pad_inches=0.02, dpi=300)
 
-def plot_sample_autocorrelation(lags, acf, title):
+def plot_sample_autocorrelation(lags, acf, title, day1, receiver1, day2=None, receiver2=None):
     plt.figure(figsize=(10, 3))
 
     mask = (lags % 5 == 0)
@@ -302,4 +323,5 @@ def plot_sample_autocorrelation(lags, acf, title):
     plt.grid(True)
 
     plt.tight_layout()
-    plt.show()
+    plt.savefig(f"plots/autocorr_{day1}_{day2}_{receiver1}_{receiver2}.png", bbox_inches="tight",
+                pad_inches=0.02, dpi=300)
