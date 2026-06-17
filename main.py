@@ -50,17 +50,17 @@ df_zx1_16["north"], df_zx1_16["east"], df_zx1_16["up"] = f.ecef_to_neu(df_zx1_16
 df_zx2_15["north"], df_zx2_15["east"], df_zx2_15["up"] = f.ecef_to_neu(df_zx2_15)
 df_zx2_16["north"], df_zx2_16["east"], df_zx2_16["up"] = f.ecef_to_neu(df_zx2_16)
 
-f.plot_neu_scatter(df_zx1_15, "15.11.2005 - Receiver 1")
-f.plot_neu_scatter(df_zx1_16, "16.11.2005 - Receiver 1")
-f.plot_neu_scatter(df_zx2_15, "15.11.2005 - Receiver 2")
-f.plot_neu_scatter(df_zx2_16, "16.11.2005 - Receiver 2")
+'''f.plot_neu_scatter(df_zx1_15, "15.11.2005", day1, 'Receiver 1')
+f.plot_neu_scatter(df_zx1_16, "16.11.2005", day2, 'Receiver 1')
+f.plot_neu_scatter(df_zx2_15, "15.11.2005", day1, 'Receiver 2')
+f.plot_neu_scatter(df_zx2_16, "16.11.2005", day2, 'Receiver 2')
 
 
  # 1 b) i)
 f.plot_neu_diff_timeline(df_zx1_15, 'Receiver 1' , day1)
 f.plot_neu_diff_timeline(df_zx1_16, 'Receiver 1' ,day2)
 f.plot_neu_diff_timeline(df_zx2_15, 'Receiver 2' ,day1)
-f.plot_neu_diff_timeline(df_zx2_16, 'Receiver 2' ,day2)
+f.plot_neu_diff_timeline(df_zx2_16, 'Receiver 2' ,day2)'''
 
 # 1 b) ii)
 f.plot_hdop_timeline(df_zx1_15, 'Receiver 1' , day1)
@@ -69,7 +69,7 @@ f.plot_hdop_timeline(df_zx2_15, 'Receiver 2' ,day1)
 f.plot_hdop_timeline(df_zx2_16, 'Receiver 2' ,day2)
 
 
-# 2 b)
+'''# 2 b)
 zx1_15_xyz_mean = f.calc_mean_xyz(df_zx1_15)
 zx1_16_xyz_mean = f.calc_mean_xyz(df_zx1_16)
 zx2_15_xyz_mean = f.calc_mean_xyz(df_zx2_15)
@@ -91,17 +91,18 @@ df_dist_zx1_zx2_16 = f.convert_time(df_dist_zx1_zx2_16)
 df_dist_zx1_15_zx1_16 = f.convert_time(df_dist_zx1_15_zx1_16)
 df_dist_zx2_15_zx2_16 = f.convert_time(df_dist_zx2_15_zx2_16)
 
-f.plot_distance_timeseries(df_dist_zx1_zx2_15, "15.11.2005 - Receiver 1 & 2")
-f.plot_distance_timeseries(df_dist_zx1_zx2_16, "16.11.2005 - Receiver 1 & 2")
-f.plot_distance_timeseries(df_dist_zx1_15_zx1_16, "15.-16.11.2005 - Receiver 1")
-f.plot_distance_timeseries(df_dist_zx2_15_zx2_16, "15.-16.11.2005 - Receiver 2")
+f.plot_distance_timeseries(df_dist_zx1_zx2_15, "15.11.2005 - Receiver 1 & 2", day1, 'Receiver 1', None, 'Receiver 2')
+f.plot_distance_timeseries(df_dist_zx1_zx2_16, "16.11.2005 - Receiver 1 & 2", day2, 'Receiver 1', None,'Receiver 2')
+f.plot_distance_timeseries(df_dist_zx1_15_zx1_16, "15.-16.11.2005 - Receiver 1", day1, 'Receiver 1', day2, None)
+f.plot_distance_timeseries(df_dist_zx2_15_zx2_16, "15.-16.11.2005 - Receiver 2", day1, 'Receiver 2', day2, None)
 
 lags_zx1_zx2_15, acf_zx1_zx2_15 = f.calc_sample_autocorrelation(df_dist_zx1_zx2_15["distance"], max_lag=400)
 lags_zx1_zx2_16, acf_zx1_zx2_16 = f.calc_sample_autocorrelation(df_dist_zx1_zx2_16["distance"], max_lag=400)
 lags_zx1_15_zx1_16, acf_zx1_15_zx1_16 = f.calc_sample_autocorrelation(df_dist_zx1_15_zx1_16["distance"], max_lag=400)
 lags_zx2_15_zx2_16, acf_zx2_15_zx2_16 = f.calc_sample_autocorrelation(df_dist_zx2_15_zx2_16["distance"], max_lag=400)
 
-f.plot_sample_autocorrelation(lags_zx1_zx2_15, acf_zx1_zx2_15, "15.11.2005 - Receiver 1 & 2")
-f.plot_sample_autocorrelation(lags_zx1_zx2_16, acf_zx1_zx2_16, "16.11.2005 - Receiver 1 & 2")
-f.plot_sample_autocorrelation(lags_zx1_15_zx1_16, acf_zx1_15_zx1_16, "15.-16.11.2005 - Receiver 1")
-f.plot_sample_autocorrelation(lags_zx2_15_zx2_16, acf_zx2_15_zx2_16, "15.-16.11.2005 - Receiver 2")
+f.plot_sample_autocorrelation(lags_zx1_zx2_15, acf_zx1_zx2_15, "15.11.2005 - Receiver 1 & 2", day1, 'Receiver 1', None, 'Receiver 2')
+f.plot_sample_autocorrelation(lags_zx1_zx2_16, acf_zx1_zx2_16, "16.11.2005 - Receiver 1 & 2", day2, 'Receiver 1', None,'Receiver 2')
+f.plot_sample_autocorrelation(lags_zx1_15_zx1_16, acf_zx1_15_zx1_16, "15.-16.11.2005 - Receiver 1", day1, 'Receiver 1', day2, None)
+f.plot_sample_autocorrelation(lags_zx2_15_zx2_16, acf_zx2_15_zx2_16, "15.-16.11.2005 - Receiver 2", day1, 'Receiver 2', day2, None)
+'''
