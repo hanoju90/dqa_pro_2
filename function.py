@@ -2,7 +2,6 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
-from matplotlib.ticker import MaxNLocator
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 
 # preprocessing
@@ -150,7 +149,6 @@ def geometric_distance(df1, df2):
 
 def calc_sample_autocorrelation(x, max_lag):
     x = np.asarray(x, dtype=float)
-    print(len(x))
     x = x - np.mean(x)
     gamma_0 = np.sum(x*x)/len(x)
 
@@ -202,7 +200,7 @@ def plot_neu_scatter(df, title, day, receiver):
     ax.set_aspect("equal", adjustable="box")
     ax.grid(True)
     plt.tight_layout()
-    plt.savefig(f"plots/ll_scatter_{day}{receiver}.png", bbox_inches="tight", pad_inches=0.02, dpi=300)
+    plt.show()
 
 def plot_neu_diff_timeline(df, receiver, day):
     fig, ax = plt.subplots()
@@ -233,7 +231,7 @@ def plot_neu_diff_timeline(df, receiver, day):
     plt.title(f"Difference North-East-Up\n{day} - {receiver}", fontsize=12)
 
     plt.tight_layout()
-    plt.savefig(f"plots/ll_timeline_{day}_{receiver}.png", bbox_inches="tight", pad_inches=0.02, dpi=300)
+    plt.show()
 
 def plot_hdop_timeline(df, receiver, day):
     fig, ax1 = plt.subplots()
@@ -266,7 +264,7 @@ def plot_hdop_timeline(df, receiver, day):
 
     ax1.grid()
     plt.tight_layout()
-    plt.savefig(f"plots/hdop_timeline_{day}_{receiver}.png", bbox_inches="tight", pad_inches=0.02, dpi=300)
+    plt.show()
 
 def plot_distance_timeseries(df, title, day1, receiver1, day2=None, receiver2=None):
     fig, ax = plt.subplots()
@@ -288,7 +286,7 @@ def plot_distance_timeseries(df, title, day1, receiver1, day2=None, receiver2=No
     ax.grid(True)
 
     plt.tight_layout()
-    plt.savefig(f"plots/distance_timeline_{day1}_{day2}_{receiver1}_{receiver2}.png", bbox_inches="tight", pad_inches=0.02, dpi=300)
+    plt.show()
 
 def plot_sample_autocorrelation(lags, acf, title, day1, receiver1, day2=None, receiver2=None):
     plt.figure(figsize=(10, 3))
@@ -309,5 +307,4 @@ def plot_sample_autocorrelation(lags, acf, title, day1, receiver1, day2=None, re
     plt.grid(True)
 
     plt.tight_layout()
-    plt.savefig(f"plots/autocorr_{day1}_{day2}_{receiver1}_{receiver2}.png", bbox_inches="tight",
-                pad_inches=0.02, dpi=300)
+    plt.show()
