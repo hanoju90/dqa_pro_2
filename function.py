@@ -147,23 +147,31 @@ def geometric_distance(df1, df2):
 
     return df_distance
 
-def calc_sample_autocorrelation(x, max_lag):
-    x = np.asarray(x, dtype=float)
-    x = x - np.mean(x)
-    gamma_0 = np.sum(x*x)/len(x)
+def calc_sample_autocorrelation(df, max_lag, start_time):
+    df["time"] = pd.to_datetime(df["time"])
+    start_time = pd.to_datetime(start_time)
+
+    df_crop = df[
+        df["time"] >= start_time
+        ]
+
+    dist = df_crop["distance"]
+    dist = np.asarray(dist, dtype=float)
+    dist = dist - np.mean(dist)
+    gamma_0 = np.sum(dist*dist)/len(dist)
 
     lags = np.arange(max_lag + 1)
     acf = np.zeros(max_lag + 1)
 
     for h in lags:
-        gamma_h = np.sum(x[:len(x)-h] * x[h:]) / len(x)
+        gamma_h = np.sum(dist[:len(dist)-h] * dist[h:]) / len(dist)
         acf[h] = gamma_h / gamma_0
 
     return lags, acf
 
 
 # plots
-def plot_neu_scatter(df, title, day, receiver):
+def plot_neu_scatter(df, title, receiver):
     fig, ax = plt.subplots(figsize=(7, 6))
 
     plt.xlabel("East [m]")
@@ -266,7 +274,7 @@ def plot_hdop_timeline(df, receiver, day):
     plt.tight_layout()
     plt.show()
 
-def plot_distance_timeseries(df, title, day1, receiver1, day2=None, receiver2=None):
+def plot_distance_timeseries(df, title):
     fig, ax = plt.subplots()
 
     ax.plot(df["time"], df["distance"], color="blue")
@@ -288,10 +296,10 @@ def plot_distance_timeseries(df, title, day1, receiver1, day2=None, receiver2=No
     plt.tight_layout()
     plt.show()
 
-def plot_sample_autocorrelation(lags, acf, title, day1, receiver1, day2=None, receiver2=None):
+def plot_sample_autocorrelation(lags, acf, title):
     plt.figure(figsize=(10, 3))
 
-    mask = (lags % 5 == 0)
+    mask = (lags % 8 == 0)
     markerline, stemlines, baseline = plt.stem(lags[mask], acf[mask])
 
     plt.setp(markerline, color="blue")
